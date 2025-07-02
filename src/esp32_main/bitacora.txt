@@ -1,0 +1,5 @@
+SRD 12 - Nodo 1: ESP32 principal (pantalla + renderizado)
+    Comunicación directa con la pantalla Nextion (por UART)
+    Renderizado final de datos (solo lectura de buffers)
+    Coordinación general y supervisión del sistema
+    TODO: definir protocolo de comunicacion entre ESPs

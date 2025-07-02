@@ -1,0 +1,5 @@
+SRD 13 - Nodo 2: ESP32 sensores de movimiento (IMU + brújula)
+    Lectura de orientación e inclinación desde BN085
+    Conversión a grados decimales
+    Publicación por  hacia nodo principal
+    TODO: definir protocolo de comunicacion entre ESPs

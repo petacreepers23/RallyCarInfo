@@ -1,0 +1,5 @@
+SRD 14 - Nodo 3: ESP32 sensores de vehículo (TPMS + OBDII)
+    Lectura de sensores TPMS por receptor dedicado
+    Lectura OBDII si se conecta vía Bluetooth o serial
+    Publicación de valores de presión/temperatura
+    TODO: definir protocolo de comunicación entre ESPs
