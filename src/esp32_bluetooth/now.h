@@ -17,7 +17,7 @@ public:
       return false;
     }
 
-    esp_now_register_send_cb(onDataSent);
+    //esp_now_register_send_cb(onDataSent);
 
     memcpy(peerInfo.peer_addr, kBroadcastAddress, 6);
     peerInfo.channel = 0;

@@ -14,6 +14,7 @@ void setup() {
 }
 
 void loop() {
+  Serial.println("Sending tire data...");
   TireData tireData{0, 0, 20, 28, 31};
   now.sendTire(tireData);
 
