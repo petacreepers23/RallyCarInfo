@@ -99,6 +99,8 @@ void loop() {
     packet.data.position = positionDto;
   }
 
+
+  
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &packet, sizeof(packet));
    
@@ -109,4 +111,13 @@ void loop() {
     Serial.println("Error sending the data");
   }
   delay(2000);
+}
+
+//Funcion auxiliar para imprimir en hexadecimal un array de uints
+String buildPayloadHex(uint8_t* payload, uint8_t payloadlen) {
+  String payloadhex = "";
+  for (int i = 0; i < payloadlen; i++) {
+    payloadhex += String(payload[i], HEX);
+  }
+  return payloadhex;
 }
