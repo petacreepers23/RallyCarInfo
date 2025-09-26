@@ -1,0 +1,30 @@
+NexPage p0 = NexPage(0,0,"page0"); 
+
+auto waterTemp = NexNumber(0, 1, "waterTemp"); 
+auto waterPressure = NexNumber(0, 1, "waterPressure"); 
+
+auto oilTemp = NexNumber(0, 1, "oilTemp"); 
+auto oilPressure = NexNumber(0, 1, "oilPressure"); 
+
+auto compass = NexNumber(0, 1, "compass"); 
+auto roll = NexNumber(0, 1, "roll"); 
+auto pitch = NexNumber(0, 1, "pitch"); 
+
+// Tyres 
+auto flPressure = NexNumber(0, 1, "flPressure"); 
+auto flTemp = NexNumber(0, 1, "flTemp"); 
+auto flBattery = NexNumber(0, 1, "flBattery"); 
+
+auto frPressure = NexNumber(0, 1, "frPressure"); 
+auto frTemp = NexNumber(0, 1, "frTemp"); 
+auto frBattery = NexNumber(0, 1, "frBattery"); 
+
+auto blPressure = NexNumber(0, 1, "blPressure"); 
+auto blTemp = NexNumber(0, 1, "blTemp"); 
+auto blBattery = NexNumber(0, 1, "blBattery"); 
+
+auto brPressure = NexNumber(0, 1, "brPressure"); 
+auto brTemp = NexNumber(0, 1, "brTemp"); 
+auto brBattery = NexNumber(0, 1, "brBattery"); 
+
+
