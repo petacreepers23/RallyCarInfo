@@ -6,8 +6,18 @@ struct TyreScreenFields {
     NexNumber pressure;
     NexNumber temperature;
     NexNumber battery;
-    TyreScreenFields(const std::string &pressureName, const std::string &tempName, const std::string &batteryName)
-        : pressure(0, 1, pressureName.c_str()),
-          temperature(0, 1, tempName.c_str()),
-          battery(0, 1, batteryName.c_str()) {}
+    TyreScreenFields(NexNumber pressure, NexNumber temperature, NexNumber battery)
+        : pressure(pressure), temperature(temperature), battery(battery) {}
+};
+
+
+struct OrientationScreenFields {
+    NexNumber compass;
+    NexPicture rollBig;
+    NexPicture pitchBig;
+    NexPicture rollSmall;
+    NexPicture pitchSmall;
+
+    OrientationScreenFields(NexNumber compass, NexPicture rollBig, NexPicture pitchBig, NexPicture rollSmall, NexPicture pitchSmall)
+        : compass(compass), rollBig(rollBig), pitchBig(pitchBig), rollSmall(rollSmall), pitchSmall(pitchSmall) {}
 };

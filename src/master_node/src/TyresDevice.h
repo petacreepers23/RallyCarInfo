@@ -1,15 +1,15 @@
-#include <unordered_map>
 #pragma once
 
+#include <unordered_map>
 #include "Arduino.h"
 #include "BLEDevice.h"
 #include "IDevice.h"
 #include "screenfields.h"
 
 
-class TPMS : public IDevice {
+class TyresDevice : public IDevice {
 public:
-    TPMS(const TyreScreenFields& fl, const TyreScreenFields& fr, const TyreScreenFields& bl, const TyreScreenFields& br)
+    TyresDevice(const TyreScreenFields& fl, const TyreScreenFields& fr, const TyreScreenFields& bl, const TyreScreenFields& br)
         : tyreFields{fl, fr, bl, br}, callback(nullptr), pBLEScan(nullptr) {
         addressMap[FL_ADDR] = &tyreFields[0];
         addressMap[FR_ADDR] = &tyreFields[1];
@@ -17,11 +17,8 @@ public:
         addressMap[BR_ADDR] = &tyreFields[3];
     }
 
-    void begin() override { setupTpms(); }
-    void update() override { loopTpms(); }
-
-    void setupTpms();
-    void loopTpms();
+    void begin() override; 
+    void update() override; 
 
 private:
     TyreScreenFields tyreFields[4];
@@ -37,11 +34,11 @@ private:
 
     class CbBtDeviceAdvertising : public BLEAdvertisedDeviceCallbacks {
     public:
-        CbBtDeviceAdvertising(TPMS* parent) : parent(parent) {}
+        CbBtDeviceAdvertising(TyresDevice* parent) : parent(parent) {}
         void decodeManufacturerData(uint8_t *data, uint8_t len, TyreScreenFields& fields);
         void onResult(BLEAdvertisedDevice dev) override;
     private:
-        TPMS* parent;
+        TyresDevice* parent;
     };
     CbBtDeviceAdvertising* callback;
 };

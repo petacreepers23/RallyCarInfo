@@ -2,10 +2,10 @@
 // BLE Service
 #include "Arduino.h"
 #include "BLEDevice.h"
-#include "tpms.h"
+#include "TyresDevice.h"
 
 
-void TPMS::setupTpms() {
+void TyresDevice::begin() { 
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan();
   callback = new CbBtDeviceAdvertising(this);
@@ -15,13 +15,13 @@ void TPMS::setupTpms() {
   pBLEScan->setWindow(99);
 }
 
-void TPMS::loopTpms() {
+void TyresDevice::update() { 
   BLEScanResults foundDevices = pBLEScan->start(5, false);
   pBLEScan->clearResults();   // delete results fromBLEScan buffer to release memory
 }
 
 // --- Inner callback implementation ---
-void TPMS::CbBtDeviceAdvertising::decodeManufacturerData(uint8_t *data, uint8_t len, TyreScreenFields& fields) {
+void TyresDevice::CbBtDeviceAdvertising::decodeManufacturerData(uint8_t *data, uint8_t len, TyreScreenFields& fields) {
   if (len < 7) return;
   uint8_t nibbles[14];
   for (int i = 0; i < 7; i++) {
@@ -39,7 +39,7 @@ void TPMS::CbBtDeviceAdvertising::decodeManufacturerData(uint8_t *data, uint8_t 
   fields.battery.setValue(battery);
 }
 
-void TPMS::CbBtDeviceAdvertising::onResult(BLEAdvertisedDevice dev) {
+void TyresDevice::CbBtDeviceAdvertising::onResult(BLEAdvertisedDevice dev) {
   BLEAddress *pServerAddress = new BLEAddress(dev.getAddress());
   std::string addrStr = pServerAddress->toString();
   auto it = parent->addressMap.find(addrStr);
