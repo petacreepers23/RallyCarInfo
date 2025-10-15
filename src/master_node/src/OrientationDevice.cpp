@@ -13,12 +13,40 @@ void OrientationDevice::begin() {
     Wire.begin();
     
     // Initialize BNO085
-    while (myIMU.begin() == false) {
-        // Serial.println("BNO085 not detected at default I2C address. Check your jumpers and the hookup guide");
+    initializeSensor();
+}
+
+void OrientationDevice::initializeSensor() {
+    sensorConnected = false;
+    int attempts = 0;
+    const int maxAttempts = 10;
+    
+    while (attempts < maxAttempts && !sensorConnected) {
+        if (myIMU.begin() == true) {
+            // Enable the rotation vector output (quaternion)
+            myIMU.enableRotationVector(50); // Send data update every 50ms (20Hz)
+            sensorConnected = true;
+            lastValidReading = millis();
+            // Serial.println("BNO085 initialized successfully");
+        } else {
+            attempts++;
+            // Serial.printf("BNO085 initialization attempt %d failed\n", attempts);
+            delay(500);
+        }
     }
     
-    // Enable the rotation vector output (quaternion)
-    myIMU.enableRotationVector(50); // Send data update every 50ms (20Hz)
+    if (!sensorConnected) {
+        // Serial.println("Failed to initialize BNO085 after multiple attempts");
+    }
+}
+
+void OrientationDevice::resetSensor() {
+    // Serial.println("Attempting to reset BNO085 sensor...");
+    
+    // Try to reinitialize the sensor
+    initializeSensor();
+    
+    lastResetAttempt = millis();
 }
 
 
@@ -54,11 +82,14 @@ void quaternionToEuler(float qr, float qi, float qj, float qk, float* roll, floa
 
 
 void OrientationDevice::update() {
-        
-    // Check if new data is available
-    if (myIMU.getSensorEvent() == true) {
+    unsigned long currentTime = millis();
+    
+    // Check if sensor is connected and try to get data
+    if (sensorConnected && myIMU.getSensorEvent() == true) {
         // Check if we have rotation vector data
         if (myIMU.getSensorEventID() == SENSOR_REPORTID_ROTATION_VECTOR) {
+            lastValidReading = currentTime;  // Update last valid reading timestamp
+            
             float quatI = myIMU.getQuatI();
             float quatJ = myIMU.getQuatJ();
             float quatK = myIMU.getQuatK();
@@ -102,13 +133,22 @@ void OrientationDevice::update() {
             uint8_t rollImageId = 26 + (rollDegrees * 8) / 40;  // Center at ID 26, ±8 IDs for ±40°
             
             const uint8_t MIN_PIC_ID = 36;
-            // r_screenFields.rollBig.setPic(rollImageId);
+            // r_screenFields.rollBig.setPi(rollImageId);
             // r_screenFields.pitchBig.setPic(pitchImageId);
             
             r_screenFields.rollSmall.setPic(rollImageId + MIN_PIC_ID);
             r_screenFields.pitchSmall.setPic(pitchImageId + MIN_PIC_ID);
-            
-        
+        }
     }
-
+    
+    // Check for sensor timeout or disconnection
+    if (sensorConnected && (currentTime - lastValidReading > TIMEOUT_MS)) {
+        // Serial.println("IMU sensor timeout detected - no readings for 5 seconds");
+        sensorConnected = false;
+    }
+    
+    // If sensor is not connected and enough time has passed since last reset attempt
+    if (!sensorConnected && (currentTime - lastResetAttempt > RESET_INTERVAL_MS)) {
+        resetSensor();
+    }
 }

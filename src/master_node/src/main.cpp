@@ -40,7 +40,16 @@ OrientationScreenFields orientation(compass, rollBig, pitchBig, rollSmall, pitch
 OrientationDevice orientationDevice(orientation);
 
 void setup() {
-  nexInit();
+  // nexInit();
+  // Cant init with other baud rate
+  dbSerialBegin(115200);
+  nexSerial.begin(115200);
+  sendCommand("");
+  sendCommand("bkcmd=1");
+  recvRetCommandFinished();
+  sendCommand("page 0");
+  recvRetCommandFinished();
+  
   // deviceManager.addDevice(&tyresDevice);
   deviceManager.addDevice(&orientationDevice);
   deviceManager.beginAll();
