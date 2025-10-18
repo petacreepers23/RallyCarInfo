@@ -137,15 +137,6 @@ void OrientationDevice::update() {
             float roll, pitch, compass;
             quaternionToEuler(quatReal, quatI, quatJ, quatK, &roll, &pitch, &compass);
 
-            // // Print the values
-            // dbSerialPrint("Compass: ");
-            // dbSerialPrint(compass);
-            // dbSerialPrint(" Roll: ");
-            // dbSerialPrint(roll);
-            // dbSerialPrint(" Pitch: ");
-            // dbSerialPrint(pitch);
-            // dbSerialPrintln(); 
-
 
             // Apply calibration offsets if calibrated
             if (isCalibrated) {
@@ -153,36 +144,30 @@ void OrientationDevice::update() {
                 pitch -= pitchOffset;
             }
 
-            // Convert roll to 0-180° range (90° = level)
-            // Clamp roll to ±90° then map to 0-180°
-            if (roll > 90.0) roll = 90.0;       // Clamp to +90° max
-            if (roll < -90.0) roll = -90.0;     // Clamp to -90° min
-            float roll180 = roll + 90.0;        // Map -90°→0°, 0°→90°, +90°→180°
-            
-            // Convert pitch to 0-180° range (90° = level)
-            // Clamp pitch to ±90° then map to 0-180°
-            if (pitch > 90.0) pitch = 90.0;     // Clamp to +90° max
-            if (pitch < -90.0) pitch = -90.0;   // Clamp to -90° min
-            float pitch180 = pitch + 90.0;      // Map -90°→0°, 0°→90°, +90°→180°
-            
-            // Print the values
-            dbSerialPrint("Compass: ");
-            dbSerialPrint(compass);
-            dbSerialPrint(" Roll: ");
-            dbSerialPrint(roll180);
-            dbSerialPrint(" Pitch: ");
-            dbSerialPrint(pitch180);
-            // Print calibration offsets
-            dbSerialPrint(" - Roll Offset: ");
-            dbSerialPrint(rollOffset);
-            dbSerialPrint(" Pitch Offset: ");
-            dbSerialPrint(pitchOffset);
-            dbSerialPrintln();
 
-            // Send degree values to Nextion global variables using the new class
+            // Clamp to display range ±40°
+            if (roll > 40.0) roll = 40.0;
+            if (roll < -40.0) roll = -40.0;
+            if (pitch > 40.0) pitch = 40.0;
+            if (pitch < -40.0) pitch = -40.0;
+            
+            // Convert to 0-80 range (40 = level, 0 = -40°, 80 = +40°)
+            int roll80 = (int)(roll + 40.0);
+            int pitch80 = (int)(pitch + 40.0);
+
+            // // Print the values
+            // dbSerialPrint("Compass: ");
+            // dbSerialPrint(compass);
+            // dbSerialPrint(" Roll: ");
+            // dbSerialPrint(roll80);
+            // dbSerialPrint(" Pitch: ");
+            // dbSerialPrint(pitch80);
+            // dbSerialPrintln(); 
+            
+            // Send to Nextion variables
             r_screenFields.compassDegVar.setValue(static_cast<int>(compass));
-            r_screenFields.pitchDegVar.setValue(static_cast<int>(pitch180));
-            r_screenFields.rollDegVar.setValue(static_cast<int>(roll180));
+            r_screenFields.pitchDegVar.setValue(pitch80);
+            r_screenFields.rollDegVar.setValue(roll80);
         }
     }
     

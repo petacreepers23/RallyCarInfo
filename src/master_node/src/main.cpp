@@ -79,5 +79,5 @@ void loop() {
   nexLoop(nex_listen_list);
   
   deviceManager.updateAll();
-  delay(50);
+  delay(5);
 }
