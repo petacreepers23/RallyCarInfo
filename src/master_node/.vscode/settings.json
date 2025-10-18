@@ -12,6 +12,7 @@
         "random": "cpp",
         "initializer_list": "cpp",
         "new": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "list": "cpp"
     }
 }

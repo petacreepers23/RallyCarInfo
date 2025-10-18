@@ -8,11 +8,15 @@ class OrientationDevice : public IDevice {
 public:
 
     OrientationDevice(const OrientationScreenFields& fields)
-        : r_screenFields(fields), lastValidReading(0), lastResetAttempt(0), sensorConnected(false)
+        : r_screenFields(fields), lastValidReading(0), lastResetAttempt(0), sensorConnected(false),
+          rollOffset(0.0), pitchOffset(0.0), isCalibrated(false)
     {}
 
     void begin() override; 
     void update() override; 
+    
+    // Calibration function to be called from Nextion callback
+    void calibrateInclination();
 
 private:
     void initializeSensor();
@@ -23,4 +27,9 @@ private:
     static const unsigned long TIMEOUT_MS = 5000;  // 5 seconds timeout
     static const unsigned long RESET_INTERVAL_MS = 2000;  // Try reset every 2 seconds
     bool sensorConnected;
+    
+    // Calibration offsets
+    float rollOffset;
+    float pitchOffset;
+    bool isCalibrated;
 };

@@ -27,10 +27,10 @@ void OrientationDevice::initializeSensor() {
             myIMU.enableRotationVector(50); // Send data update every 50ms (20Hz)
             sensorConnected = true;
             lastValidReading = millis();
-            // Serial.println("BNO085 initialized successfully");
+            dbSerialPrintln("BNO085 initialized successfully");
         } else {
             attempts++;
-            // Serial.printf("BNO085 initialization attempt %d failed\n", attempts);
+            dbSerialPrintln("BNO085 initialization attempt failed\n");
             delay(500);
         }
     }
@@ -79,6 +79,36 @@ void quaternionToEuler(float qr, float qi, float qj, float qk, float* roll, floa
     if (*yaw < 0) *yaw += 360.0;
 }
 
+void OrientationDevice::calibrateInclination() {
+    if (!sensorConnected) {
+        // Serial.println("Cannot calibrate: sensor not connected");
+        return;
+    }
+    
+    // Try to get current sensor reading for calibration
+    if (myIMU.getSensorEvent() == true) {
+        if (myIMU.getSensorEventID() == SENSOR_REPORTID_ROTATION_VECTOR) {
+            float quatI = myIMU.getQuatI();
+            float quatJ = myIMU.getQuatJ();
+            float quatK = myIMU.getQuatK();
+            float quatReal = myIMU.getQuatReal();
+            
+            // Convert quaternion to Euler angles
+            float roll, pitch, compass;
+            quaternionToEuler(quatReal, quatI, quatJ, quatK, &roll, &pitch, &compass);
+            
+            // Store current angles as offsets (these represent the "level" position)
+            rollOffset = roll;
+            pitchOffset = pitch;
+            isCalibrated = true;
+            
+            // Serial.printf("Calibration complete - Roll offset: %.2f°, Pitch offset: %.2f°\n", rollOffset, pitchOffset);
+        }
+    } else {
+        // Serial.println("Cannot calibrate: no sensor data available");
+    }
+}
+
 
 
 void OrientationDevice::update() {
@@ -99,6 +129,12 @@ void OrientationDevice::update() {
             float roll, pitch, compass;
             quaternionToEuler(quatReal, quatI, quatJ, quatK, &roll, &pitch, &compass);
 
+            // Apply calibration offsets if calibrated
+            if (isCalibrated) {
+                roll -= rollOffset;
+                pitch -= pitchOffset;
+            }
+
             // Convert roll to 0-180° range (90° = level)
             // Clamp roll to ±90° then map to 0-180°
             if (roll > 90.0) roll = 90.0;       // Clamp to +90° max
@@ -115,7 +151,7 @@ void OrientationDevice::update() {
             // Serial.printf("Compass: %.1f°, Roll: %.1f°, Pitch: %.1f°\n", compass, roll180, pitch180);
 
             // Update compass as number
-            r_screenFields.compass.setValue(compass);
+            r_screenFields.compass.setValue(static_cast<int>(compass));
             
             // Convert pitch (0-180) to degrees (-90 to +90), then map to image IDs (1-17)
             // 0 -> -90°, 90 -> 0°, 180 -> +90°
@@ -136,8 +172,8 @@ void OrientationDevice::update() {
             // r_screenFields.rollBig.setPi(rollImageId);
             // r_screenFields.pitchBig.setPic(pitchImageId);
             
-            r_screenFields.rollSmall.setPic(rollImageId + MIN_PIC_ID);
-            r_screenFields.pitchSmall.setPic(pitchImageId + MIN_PIC_ID);
+            // r_screenFields.rollSmall.setPic(rollImageId + MIN_PIC_ID);
+            // r_screenFields.pitchSmall.setPic(pitchImageId + MIN_PIC_ID);
         }
     }
     
