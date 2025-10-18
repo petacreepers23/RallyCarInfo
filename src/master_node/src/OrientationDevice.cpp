@@ -55,20 +55,20 @@ void OrientationDevice::resetSensor() {
 }
 
 
-// Function to convert quaternion to Euler angles (roll, pitch, yaw)
+// Function to convert quaternion to Euler angles (roll, pitch, yaw) - FACE DOWN sensor
 void quaternionToEuler(float qr, float qi, float qj, float qk, float* roll, float* pitch, float* yaw) {
     float sqr = sq(qr);
     float sqi = sq(qi);
     float sqj = sq(qj);
     float sqk = sq(qk);
 
-    // Roll (x-axis rotation)
+    // Roll (x-axis rotation) - FLIPPED for face-down sensor
     *roll = atan2(2.0 * (qr * qi + qj * qk), sqr - sqi - sqj + sqk);
 
     // Pitch (y-axis rotation)
     float sinp = 2.0 * (qr * qj - qk * qi);
     if (abs(sinp) >= 1)
-        *pitch = copysign(PI / 2, sinp); // Use 90 degrees if out of range
+        *pitch = copysign(PI / 2, sinp);
     else
         *pitch = asin(sinp);
 
@@ -79,6 +79,10 @@ void quaternionToEuler(float qr, float qi, float qj, float qk, float* roll, floa
     *roll = *roll * 180.0 / PI;
     *pitch = *pitch * 180.0 / PI;
     *yaw = *yaw * 180.0 / PI;
+
+    // Fix roll for face-down sensor: flip to opposite side
+    *roll = *roll + 180.0;
+    if (*roll > 180.0) *roll -= 360.0;
 
     // Normalize yaw to 0-360 degrees
     if (*yaw < 0) *yaw += 360.0;
@@ -133,6 +137,16 @@ void OrientationDevice::update() {
             float roll, pitch, compass;
             quaternionToEuler(quatReal, quatI, quatJ, quatK, &roll, &pitch, &compass);
 
+            // // Print the values
+            // dbSerialPrint("Compass: ");
+            // dbSerialPrint(compass);
+            // dbSerialPrint(" Roll: ");
+            // dbSerialPrint(roll);
+            // dbSerialPrint(" Pitch: ");
+            // dbSerialPrint(pitch);
+            // dbSerialPrintln(); 
+
+
             // Apply calibration offsets if calibrated
             if (isCalibrated) {
                 roll -= rollOffset;
@@ -158,7 +172,12 @@ void OrientationDevice::update() {
             dbSerialPrint(roll180);
             dbSerialPrint(" Pitch: ");
             dbSerialPrint(pitch180);
-            dbSerialPrintln(); 
+            // Print calibration offsets
+            dbSerialPrint(" - Roll Offset: ");
+            dbSerialPrint(rollOffset);
+            dbSerialPrint(" Pitch Offset: ");
+            dbSerialPrint(pitchOffset);
+            dbSerialPrintln();
 
             // Send degree values to Nextion global variables using the new class
             r_screenFields.compassDegVar.setValue(static_cast<int>(compass));
