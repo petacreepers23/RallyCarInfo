@@ -2,6 +2,12 @@
 #include "OrientationDevice.h"
 #include <Wire.h>
 #include "SparkFun_BNO08x_Arduino_Library.h"
+#include <EEPROM.h>
+
+#define EEPROM_SIZE 512
+#define ROLL_OFFSET_ADDR 0
+#define PITCH_OFFSET_ADDR 4
+#define CALIBRATED_FLAG_ADDR 8
 
 
 // BNO085 sensor object
@@ -9,10 +15,9 @@ BNO08x myIMU;
 
 
 void OrientationDevice::begin() {
-    // Initialize I2C
+    EEPROM.begin(EEPROM_SIZE);
+    loadCalibration();
     Wire.begin();
-    
-    // Initialize BNO085
     initializeSensor();
 }
 
@@ -101,8 +106,7 @@ void OrientationDevice::calibrateInclination() {
             rollOffset = roll;
             pitchOffset = pitch;
             isCalibrated = true;
-            
-            // Serial.printf("Calibration complete - Roll offset: %.2f°, Pitch offset: %.2f°\n", rollOffset, pitchOffset);
+            saveCalibration();
         }
     } else {
         // Serial.println("Cannot calibrate: no sensor data available");
@@ -148,32 +152,18 @@ void OrientationDevice::update() {
             float pitch180 = pitch + 90.0;      // Map -90°→0°, 0°→90°, +90°→180°
             
             // Print the values
-            // Serial.printf("Compass: %.1f°, Roll: %.1f°, Pitch: %.1f°\n", compass, roll180, pitch180);
+            dbSerialPrint("Compass: ");
+            dbSerialPrint(compass);
+            dbSerialPrint(" Roll: ");
+            dbSerialPrint(roll180);
+            dbSerialPrint(" Pitch: ");
+            dbSerialPrint(pitch180);
+            dbSerialPrintln(); 
 
-            // Update compass as number
-            r_screenFields.compass.setValue(static_cast<int>(compass));
-            
-            // Convert pitch (0-180) to degrees (-90 to +90), then map to image IDs (1-17)
-            // 0 -> -90°, 90 -> 0°, 180 -> +90°
-            int pitchDegrees = pitch180 - 90;  // Convert to -90 to +90
-            // Clamp to -40 to +40 range and map to IDs 1-17
-            if (pitchDegrees < -40) pitchDegrees = -40;
-            if (pitchDegrees > 40) pitchDegrees = 40;
-            uint8_t pitchImageId = 9 + (pitchDegrees * 8) / 40;  // Center at ID 9, ±8 IDs for ±40°
-            
-            // Convert roll (0-180) to degrees (-90 to +90), then map to image IDs (18-34)
-            int rollDegrees = roll180 - 90;  // Convert to -90 to +90
-            // Clamp to -40 to +40 range and map to IDs 18-34
-            if (rollDegrees < -40) rollDegrees = -40;
-            if (rollDegrees > 40) rollDegrees = 40;
-            uint8_t rollImageId = 26 + (rollDegrees * 8) / 40;  // Center at ID 26, ±8 IDs for ±40°
-            
-            const uint8_t MIN_PIC_ID = 36;
-            // r_screenFields.rollBig.setPi(rollImageId);
-            // r_screenFields.pitchBig.setPic(pitchImageId);
-            
-            // r_screenFields.rollSmall.setPic(rollImageId + MIN_PIC_ID);
-            // r_screenFields.pitchSmall.setPic(pitchImageId + MIN_PIC_ID);
+            // Send degree values to Nextion global variables using the new class
+            r_screenFields.compassDegVar.setValue(static_cast<int>(compass));
+            r_screenFields.pitchDegVar.setValue(static_cast<int>(pitch180));
+            r_screenFields.rollDegVar.setValue(static_cast<int>(roll180));
         }
     }
     
@@ -187,4 +177,17 @@ void OrientationDevice::update() {
     if (!sensorConnected && (currentTime - lastResetAttempt > RESET_INTERVAL_MS)) {
         resetSensor();
     }
+}
+
+void OrientationDevice::saveCalibration() {
+    EEPROM.put(ROLL_OFFSET_ADDR, rollOffset);
+    EEPROM.put(PITCH_OFFSET_ADDR, pitchOffset);
+    EEPROM.put(CALIBRATED_FLAG_ADDR, isCalibrated);
+    EEPROM.commit();
+}
+
+void OrientationDevice::loadCalibration() {
+    EEPROM.get(ROLL_OFFSET_ADDR, rollOffset);
+    EEPROM.get(PITCH_OFFSET_ADDR, pitchOffset);
+    EEPROM.get(CALIBRATED_FLAG_ADDR, isCalibrated);
 }

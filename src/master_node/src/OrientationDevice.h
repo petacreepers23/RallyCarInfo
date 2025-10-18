@@ -21,6 +21,8 @@ public:
 private:
     void initializeSensor();
     void resetSensor();
+    void saveCalibration();
+    void loadCalibration();
     OrientationScreenFields r_screenFields;
     unsigned long lastValidReading;
     unsigned long lastResetAttempt;

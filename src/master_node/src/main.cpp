@@ -34,13 +34,8 @@ NexPage orientationPage = NexPage(1, 0, "inclination");
 
 // TyresDevice tyresDevice(fl, fr, bl, br);
 
-NexNumber compass(0, 21, "compass");
-NexPicture pitchSmall(0, 23, "pitchSmall");
-NexPicture rollSmall(0, 24, "rollSmall");
-
-NexPicture pitchBig(1, 1, "pitchBig");
-NexPicture rollBig(1, 2, "rollBig");
-OrientationScreenFields orientation(compass, rollBig, pitchBig, rollSmall, pitchSmall);
+// Create orientation device with explicit variable names
+OrientationScreenFields orientation("pitchDeg", "rollDeg", "compassDeg");
 OrientationDevice orientationDevice(orientation);
 
 // // Calibration button/hotspot
