@@ -2,6 +2,7 @@
 #include "TyresDevice.h"
 #include "OrientationDevice.h"
 #include "DeviceManager.h"
+#include "AmbientSensorDevice.h"
 
 // ESP32 built-in LED pin
 #define LED_BUILTIN 2
@@ -38,6 +39,10 @@ NexPage orientationPage = NexPage(1, 0, "inclination");
 OrientationScreenFields orientation("pitchDeg", "rollDeg", "compassDeg");
 OrientationDevice orientationDevice(orientation);
 
+// Create ambient sensor device
+AmbientScreenFields ambientFields("humidity", "temperature");
+AmbientSensorDevice ambientSensor(ambientFields);
+
 // // Calibration button/hotspot
 NexButton calibrateButton(1, 4, "calRollPitch");
 
@@ -65,6 +70,7 @@ void setup() {
   
   // deviceManager.addDevice(&tyresDevice);
   deviceManager.addDevice(&orientationDevice);
+  deviceManager.addDevice(&ambientSensor);
   deviceManager.beginAll();
 }
 

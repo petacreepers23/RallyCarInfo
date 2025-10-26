@@ -156,13 +156,13 @@ void OrientationDevice::update() {
             int pitch80 = (int)(pitch + 40.0);
 
             // // Print the values
-            // dbSerialPrint("Compass: ");
-            // dbSerialPrint(compass);
-            // dbSerialPrint(" Roll: ");
-            // dbSerialPrint(roll80);
-            // dbSerialPrint(" Pitch: ");
-            // dbSerialPrint(pitch80);
-            // dbSerialPrintln(); 
+            dbSerialPrint("Compass: ");
+            dbSerialPrint(compass);
+            dbSerialPrint(" Roll: ");
+            dbSerialPrint(roll80);
+            dbSerialPrint(" Pitch: ");
+            dbSerialPrint(pitch80);
+            dbSerialPrintln(); 
             
             // Send to Nextion variables
             r_screenFields.compassDegVar.setValue(static_cast<int>(compass));

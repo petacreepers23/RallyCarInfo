@@ -20,3 +20,11 @@ struct OrientationScreenFields {
     OrientationScreenFields(const String& pitchVarName, const String& rollVarName, const String& compassVarName) 
         : pitchDegVar(pitchVarName), rollDegVar(rollVarName), compassDegVar(compassVarName) {}
 };
+
+struct AmbientScreenFields {
+    NextionGlobalVariable humidityVar;
+    NextionGlobalVariable temperatureVar;
+
+    AmbientScreenFields(const String& humidityVarName, const String& temperatureVarName)
+        : humidityVar(humidityVarName), temperatureVar(temperatureVarName) {}
+};
