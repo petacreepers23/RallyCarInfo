@@ -71,6 +71,11 @@ void setup() {
   // deviceManager.addDevice(&tyresDevice);
   deviceManager.addDevice(&orientationDevice);
   deviceManager.addDevice(&ambientSensor);
+
+  // Configure per-device refresh intervals (ms)
+  orientationDevice.setRefreshInterval(50);   // ~20Hz updates
+  ambientSensor.setRefreshInterval(1000);     // 1Hz updates
+  // tyresDevice.setRefreshInterval(3000);    // scan every 3s (when enabled)
   deviceManager.beginAll();
 }
 
@@ -85,5 +90,5 @@ void loop() {
   nexLoop(nex_listen_list);
   
   deviceManager.updateAll();
-  delay(5);
+  // No delay to keep loop responsive; each device self-schedules via refresh interval
 }

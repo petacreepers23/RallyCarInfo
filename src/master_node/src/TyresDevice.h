@@ -19,6 +19,8 @@ public:
 
     void begin() override; 
     void update() override; 
+    void setRefreshInterval(uint32_t intervalMs) override { r_updateIntervalMs = intervalMs; }
+    uint32_t getRefreshInterval() const override { return r_updateIntervalMs; }
 
 private:
     TyreScreenFields tyreFields[4];
@@ -41,4 +43,8 @@ private:
         TyresDevice* parent;
     };
     CbBtDeviceAdvertising* callback;
+
+    // Scheduling (note: BLE scanning can block; keep intervals modest)
+    unsigned long r_lastUpdateMs = 0;
+    unsigned long r_updateIntervalMs = 3000; // default 3s scan cadence
 };

@@ -121,6 +121,19 @@ void OrientationDevice::calibrateInclination() {
 
 void OrientationDevice::update() {
     unsigned long currentTime = millis();
+
+    // Respect configured refresh interval (non-blocking)
+    if (currentTime - r_lastUpdateMs < r_updateIntervalMs) {
+        // Still check for timeouts to keep reconnection logic active
+        if (sensorConnected && (currentTime - lastValidReading > TIMEOUT_MS)) {
+            sensorConnected = false;
+        }
+        if (!sensorConnected && (currentTime - lastResetAttempt > RESET_INTERVAL_MS)) {
+            resetSensor();
+        }
+        return;
+    }
+    r_lastUpdateMs = currentTime;
     
     // Check if sensor is connected and try to get data
     if (sensorConnected && myIMU.getSensorEvent() == true) {

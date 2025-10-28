@@ -14,6 +14,8 @@ public:
 
     void begin() override; 
     void update() override; 
+    void setRefreshInterval(uint32_t intervalMs) override { r_updateIntervalMs = intervalMs; }
+    uint32_t getRefreshInterval() const override { return r_updateIntervalMs; }
     
     // Calibration function to be called from Nextion callback
     void calibrateInclination();
@@ -34,4 +36,7 @@ private:
     float rollOffset;
     float pitchOffset;
     bool isCalibrated;
+    // Scheduling
+    unsigned long r_lastUpdateMs = 0;
+    unsigned long r_updateIntervalMs = 50; // default ~20Hz to match sensor
 };

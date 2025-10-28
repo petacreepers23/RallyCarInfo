@@ -11,10 +11,12 @@ public:
 
     void begin() override;
     void update() override;
+    void setRefreshInterval(uint32_t intervalMs) override { r_updateIntervalMs = intervalMs; }
+    uint32_t getRefreshInterval() const override { return r_updateIntervalMs; }
 
 private:
     AmbientScreenFields r_screenFields;
     unsigned long r_lastUpdateMs;
-    const unsigned long r_updateIntervalMs = 1000; // ms
+    unsigned long r_updateIntervalMs = 1000; // ms, configurable
     bool r_initialized = false;
 };

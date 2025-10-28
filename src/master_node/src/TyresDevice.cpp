@@ -16,8 +16,13 @@ void TyresDevice::begin() {
 }
 
 void TyresDevice::update() { 
-  BLEScanResults foundDevices = pBLEScan->start(5, false);
-  pBLEScan->clearResults();   // delete results fromBLEScan buffer to release memory
+  unsigned long now = millis();
+  if (now - r_lastUpdateMs < r_updateIntervalMs) return;
+  r_lastUpdateMs = now;
+
+  // Keep scan duration short to reduce blocking; 1 second is a compromise.
+  BLEScanResults foundDevices = pBLEScan->start(1, false);
+  pBLEScan->clearResults();   // delete results from BLEScan buffer to release memory
 }
 
 // --- Inner callback implementation ---
