@@ -35,21 +35,17 @@ void AmbientSensorDevice::update() {
         }
     }
 
-    float temperature = htu.readTemperature(); // °C
-    float humidity = htu.readHumidity();       // %RH
+    int32_t temperature = static_cast<int32_t>(htu.readTemperature()); // °C
+    int32_t humidity = static_cast<int32_t>(htu.readHumidity());       // %RH
 
     if (isnan(temperature) || isnan(humidity)) {
         dbSerialPrintln("AmbientSensorDevice: read failed (NaN)");
         return;
     }
 
-    // Scale by 100 to keep two decimal places in integer Nextion vars (follow project pattern)
-    int32_t tempScaled = (int32_t)round(temperature * 100.0f);
-    int32_t humScaled  = (int32_t)round(humidity * 100.0f);
-
     // Update Nextion via screen fields (use setValue as other devices do)
-    r_screenFields.temperatureVar.setValue(tempScaled);
-    r_screenFields.humidityVar.setValue(humScaled);
+    r_screenFields.temperatureVar.setValue(temperature);
+    r_screenFields.humidityVar.setValue(humidity);
 
     // Debug output using project logger
     dbSerialPrint("AmbientSensorDevice: T=");

@@ -9,7 +9,7 @@ public:
 
     OrientationDevice(const OrientationScreenFields& fields)
         : r_screenFields(fields), lastValidReading(0), lastResetAttempt(0), sensorConnected(false),
-          rollOffset(0.0), pitchOffset(0.0), isCalibrated(false)
+          rollOffset(0.0), pitchOffset(0.0), compassOffset(0), isCalibrated(false)
     {}
 
     void begin() override; 
@@ -19,6 +19,8 @@ public:
     
     // Calibration function to be called from Nextion callback
     void calibrateInclination();
+    void incrementCompassOffset();
+    void decrementCompassOffset();
 
 private:
     void initializeSensor();
@@ -35,6 +37,7 @@ private:
     // Calibration offsets
     float rollOffset;
     float pitchOffset;
+    int compassOffset;
     bool isCalibrated;
     // Scheduling
     unsigned long r_lastUpdateMs = 0;

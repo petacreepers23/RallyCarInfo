@@ -8,6 +8,8 @@
 #define ROLL_OFFSET_ADDR 0
 #define PITCH_OFFSET_ADDR 4
 #define CALIBRATED_FLAG_ADDR 8
+#define COMPASS_OFFSET_ADDR 12
+#define COMPASS_CALIBRATED_FLAG_ADDR 16
 
 
 // BNO085 sensor object
@@ -117,6 +119,22 @@ void OrientationDevice::calibrateInclination() {
     }
 }
 
+void OrientationDevice::incrementCompassOffset() {
+    compassOffset -= 1;  // Decrease offset = increase displayed compass value
+    if (compassOffset < 0) compassOffset += 360;
+    dbSerialPrint("Compass offset incremented to: ");
+    dbSerialPrintln(compassOffset);
+    saveCalibration();
+}
+
+void OrientationDevice::decrementCompassOffset() {
+    compassOffset += 1;  // Increase offset = decrease displayed compass value
+    if (compassOffset >= 360) compassOffset -= 360;
+    dbSerialPrint("Compass offset decremented to: ");
+    dbSerialPrintln(compassOffset);
+    saveCalibration();
+}
+
 
 
 void OrientationDevice::update() {
@@ -156,6 +174,12 @@ void OrientationDevice::update() {
                 roll -= rollOffset;
                 pitch -= pitchOffset;
             }
+            
+            // Apply compass offset (always apply the offset)
+            int compassInt = (int)compass;
+            compassInt -= compassOffset;
+            if (compassInt < 0) compassInt += 360;
+            if (compassInt >= 360) compassInt -= 360;
 
 
             // Clamp to display range ±40°
@@ -170,7 +194,11 @@ void OrientationDevice::update() {
 
             // // Print the values
             dbSerialPrint("Compass: ");
-            dbSerialPrint(compass);
+            dbSerialPrint(compassInt);
+            // offset compass
+            dbSerialPrint(" (offset ");
+            dbSerialPrint(compassOffset);
+            dbSerialPrint(") ");
             dbSerialPrint(" Roll: ");
             dbSerialPrint(roll80);
             dbSerialPrint(" Pitch: ");
@@ -178,7 +206,7 @@ void OrientationDevice::update() {
             dbSerialPrintln(); 
             
             // Send to Nextion variables
-            r_screenFields.compassDegVar.setValue(static_cast<int>(compass));
+            r_screenFields.compassDegVar.setValue(compassInt);
             r_screenFields.pitchDegVar.setValue(pitch80);
             r_screenFields.rollDegVar.setValue(roll80);
         }
@@ -200,6 +228,7 @@ void OrientationDevice::saveCalibration() {
     EEPROM.put(ROLL_OFFSET_ADDR, rollOffset);
     EEPROM.put(PITCH_OFFSET_ADDR, pitchOffset);
     EEPROM.put(CALIBRATED_FLAG_ADDR, isCalibrated);
+    EEPROM.put(COMPASS_OFFSET_ADDR, compassOffset);
     EEPROM.commit();
 }
 
@@ -207,4 +236,21 @@ void OrientationDevice::loadCalibration() {
     EEPROM.get(ROLL_OFFSET_ADDR, rollOffset);
     EEPROM.get(PITCH_OFFSET_ADDR, pitchOffset);
     EEPROM.get(CALIBRATED_FLAG_ADDR, isCalibrated);
+    EEPROM.get(COMPASS_OFFSET_ADDR, compassOffset);
+    
+    // Check for uninitialized EEPROM (NaN values) and set defaults
+    if (isnan(rollOffset)) rollOffset = 0.0;
+    if (isnan(pitchOffset)) pitchOffset = 0.0;
+    if (compassOffset < 0 || compassOffset >= 360) compassOffset = 0;
+    if (isCalibrated != 0 && isCalibrated != 1) isCalibrated = false;
+    
+    // Debug print loaded values
+    dbSerialPrint("Loaded calibration - Roll: ");
+    dbSerialPrint(rollOffset);
+    dbSerialPrint(" Pitch: ");
+    dbSerialPrint(pitchOffset);
+    dbSerialPrint(" Compass: ");
+    dbSerialPrint(compassOffset);
+    dbSerialPrint(" Calibrated: ");
+    dbSerialPrintln(isCalibrated);
 }

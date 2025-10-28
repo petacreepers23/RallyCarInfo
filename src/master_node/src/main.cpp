@@ -40,24 +40,28 @@ OrientationScreenFields orientation("pitchDeg", "rollDeg", "compassDeg");
 OrientationDevice orientationDevice(orientation);
 
 // Create ambient sensor device
-AmbientScreenFields ambientFields("humidity", "temperature");
+AmbientScreenFields ambientFields("humi", "temp");
 AmbientSensorDevice ambientSensor(ambientFields);
 
-// // Calibration button/hotspot
-NexButton calibrateButton(1, 4, "calRollPitch");
+// Calibration button/hotspot
+NexButton calibrateInclinationButton(2, 8, "calRollPitch");
+NexButton compassDecButton(2, 10, "compassDec");
+NexButton compassIncButton(2, 7, "compassInc");
 
 // Callback function for calibration
 void calibrateInclinationCallback(void *ptr) {
-  // Turn on LED to indicate button press detected
-  digitalWrite(LED_BUILTIN, HIGH);
   dbSerialPrintln("Calibration button pressed");
-  
   orientationDevice.calibrateInclination();
-  
-  // Keep LED on for 1 second, then turn off
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-  
+}
+
+void compassDecCallback(void *ptr) {
+  dbSerialPrintln("Compass decrement button pressed");
+  orientationDevice.decrementCompassOffset();
+}
+
+void compassIncCallback(void *ptr) {
+  dbSerialPrintln("Compass increment button pressed");
+  orientationDevice.incrementCompassOffset();
 }
 
 void setup() {
@@ -66,14 +70,16 @@ void setup() {
   
   nexInit();
   // Register calibration callback
-  calibrateButton.attachPop(calibrateInclinationCallback, &calibrateButton);
+  calibrateInclinationButton.attachPop(calibrateInclinationCallback, &calibrateInclinationButton);
+  compassDecButton.attachPop(compassDecCallback, &compassDecButton);
+  compassIncButton.attachPop(compassIncCallback, &compassIncButton);
   
   // deviceManager.addDevice(&tyresDevice);
   deviceManager.addDevice(&orientationDevice);
   deviceManager.addDevice(&ambientSensor);
 
   // Configure per-device refresh intervals (ms)
-  orientationDevice.setRefreshInterval(50);   // ~20Hz updates
+  orientationDevice.setRefreshInterval(5);   // ~20Hz updates
   ambientSensor.setRefreshInterval(1000);     // 1Hz updates
   // tyresDevice.setRefreshInterval(3000);    // scan every 3s (when enabled)
   deviceManager.beginAll();
@@ -81,7 +87,9 @@ void setup() {
 
 // Touch event list for Nextion callbacks
 NexTouch *nex_listen_list[] = {
-  &calibrateButton,
+  &calibrateInclinationButton,
+  &compassDecButton,
+  &compassIncButton,
   NULL
 };
 
