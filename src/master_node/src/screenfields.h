@@ -4,11 +4,12 @@
 #include <string>
 
 struct TyreScreenFields {
-    NexNumber pressure;
-    NexNumber temperature;
-    NexNumber battery;
-    TyreScreenFields(NexNumber pressure, NexNumber temperature, NexNumber battery)
-        : pressure(pressure), temperature(temperature), battery(battery) {}
+    NextionGlobalVariable temperatureVar;
+    NextionGlobalVariable voltageVar;
+    NextionGlobalVariable pressureVar;
+    
+    TyreScreenFields(const String& tempVarName, const String& voltVarName, const String& pressureVarName)
+        : temperatureVar(tempVarName), voltageVar(voltVarName), pressureVar(pressureVarName) {}
 };
 
 

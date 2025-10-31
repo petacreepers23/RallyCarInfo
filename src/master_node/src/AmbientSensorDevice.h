@@ -13,6 +13,8 @@ public:
     void update() override;
     void setRefreshInterval(uint32_t intervalMs) override { r_updateIntervalMs = intervalMs; }
     uint32_t getRefreshInterval() const override { return r_updateIntervalMs; }
+    
+    const char* getDeviceName() const override { return "AmbientSensorDevice"; }
 
 private:
     AmbientScreenFields r_screenFields;

@@ -17,6 +17,8 @@ public:
     void setRefreshInterval(uint32_t intervalMs) override { r_updateIntervalMs = intervalMs; }
     uint32_t getRefreshInterval() const override { return r_updateIntervalMs; }
     
+    const char* getDeviceName() const override { return "OrientationDevice"; }
+    
     // Calibration function to be called from Nextion callback
     void calibrateInclination();
     void incrementCompassOffset();

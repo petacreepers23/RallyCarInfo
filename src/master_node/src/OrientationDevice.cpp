@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include "SparkFun_BNO08x_Arduino_Library.h"
 #include <EEPROM.h>
+#include "DeviceDebug.h"
 
 #define EEPROM_SIZE 512
 #define ROLL_OFFSET_ADDR 0
@@ -34,21 +35,21 @@ void OrientationDevice::initializeSensor() {
             myIMU.enableRotationVector(50); // Send data update every 50ms (20Hz)
             sensorConnected = true;
             lastValidReading = millis();
-            dbSerialPrintln("BNO085 initialized successfully");
+            THIS_DEBUG_PRINTLN("BNO085 initialized successfully");
         } else {
             attempts++;
-            dbSerialPrintln("BNO085 initialization attempt failed\n");
+            THIS_DEBUG_PRINTLN("BNO085 initialization attempt failed");
             delay(500);
         }
     }
     
     if (!sensorConnected) {
-        // Serial.println("Failed to initialize BNO085 after multiple attempts");
+        THIS_DEBUG_PRINTLN("Failed to initialize BNO085 after multiple attempts");
     }
 }
 
 void OrientationDevice::resetSensor() {
-    // Serial.println("Attempting to reset BNO085 sensor...");
+    THIS_DEBUG_PRINTLN("Attempting to reset BNO085 sensor...");
     
     // Try to reinitialize the sensor
     initializeSensor();
@@ -122,16 +123,14 @@ void OrientationDevice::calibrateInclination() {
 void OrientationDevice::incrementCompassOffset() {
     compassOffset -= 1;  // Decrease offset = increase displayed compass value
     if (compassOffset < 0) compassOffset += 360;
-    dbSerialPrint("Compass offset incremented to: ");
-    dbSerialPrintln(compassOffset);
+    THIS_DEBUG_PRINTLN("Compass offset incremented to: ", compassOffset);
     saveCalibration();
 }
 
 void OrientationDevice::decrementCompassOffset() {
     compassOffset += 1;  // Increase offset = decrease displayed compass value
     if (compassOffset >= 360) compassOffset -= 360;
-    dbSerialPrint("Compass offset decremented to: ");
-    dbSerialPrintln(compassOffset);
+    THIS_DEBUG_PRINTLN("Compass offset decremented to: ", compassOffset);
     saveCalibration();
 }
 
@@ -192,18 +191,8 @@ void OrientationDevice::update() {
             int roll80 = (int)(roll + 40.0);
             int pitch80 = (int)(pitch + 40.0);
 
-            // // Print the values
-            dbSerialPrint("Compass: ");
-            dbSerialPrint(compassInt);
-            // offset compass
-            dbSerialPrint(" (offset ");
-            dbSerialPrint(compassOffset);
-            dbSerialPrint(") ");
-            dbSerialPrint(" Roll: ");
-            dbSerialPrint(roll80);
-            dbSerialPrint(" Pitch: ");
-            dbSerialPrint(pitch80);
-            dbSerialPrintln(); 
+            // Print the values
+            THIS_DEBUG_PRINTLN("Compass: ", compassInt, " (offset ", compassOffset, ") Roll: ", roll80, " Pitch: ", pitch80);
             
             // Send to Nextion variables
             r_screenFields.compassDegVar.setValue(compassInt);
@@ -245,12 +234,5 @@ void OrientationDevice::loadCalibration() {
     if (isCalibrated != 0 && isCalibrated != 1) isCalibrated = false;
     
     // Debug print loaded values
-    dbSerialPrint("Loaded calibration - Roll: ");
-    dbSerialPrint(rollOffset);
-    dbSerialPrint(" Pitch: ");
-    dbSerialPrint(pitchOffset);
-    dbSerialPrint(" Compass: ");
-    dbSerialPrint(compassOffset);
-    dbSerialPrint(" Calibrated: ");
-    dbSerialPrintln(isCalibrated);
+    THIS_DEBUG_PRINTLN("Loaded calibration - Roll: ", rollOffset, " Pitch: ", pitchOffset, " Compass: ", compassOffset, " Calibrated: ", isCalibrated);
 }
